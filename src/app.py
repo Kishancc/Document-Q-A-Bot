@@ -7,8 +7,24 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from src.config import DATA_DIR
 from src.ingest import ingest_documents
 from src.query import query_documents
+
+
+def save_uploaded_files(uploaded_files: list) -> list[Path]:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    saved_paths: list[Path] = []
+
+    for uploaded_file in uploaded_files:
+        destination = DATA_DIR / Path(uploaded_file.name).name
+        if destination.exists():
+            destination = DATA_DIR / f"{destination.stem}_{len(saved_paths) + 1}{destination.suffix}"
+        with open(destination, "wb") as handle:
+            handle.write(uploaded_file.getbuffer())
+        saved_paths.append(destination)
+
+    return saved_paths
 
 
 def main() -> None:
@@ -22,8 +38,27 @@ def main() -> None:
     if tab == "Ingest documents":
         st.header("Ingest documents")
         st.write(
-            "Upload PDF, DOCX, or TXT files into the `data/` folder, then click the button below to ingest them into the local vector store."
+            "Upload PDF, DOCX, or TXT files directly from your browser, then ingest them into the local vector store."
         )
+
+        uploaded_files = st.file_uploader(
+            "Upload documents",
+            type=["pdf", "docx", "txt"],
+            accept_multiple_files=True,
+        )
+
+        if uploaded_files:
+            if st.button("Save uploaded files"):
+                try:
+                    saved_paths = save_uploaded_files(uploaded_files)
+                    st.success(f"Saved {len(saved_paths)} file(s) to {DATA_DIR}.")
+                    for path in saved_paths:
+                        st.write(f"- {path.name}")
+                except Exception as exc:
+                    st.error(f"Failed to save uploaded files: {exc}")
+
+        st.markdown("---")
+        st.write("Or ingest already uploaded files from the `data/` folder.")
 
         if st.button("Ingest documents"):
             with st.spinner("Ingesting documents..."):
@@ -34,7 +69,7 @@ def main() -> None:
                     st.error(f"Ingestion failed: {exc}")
 
         st.info(
-            "Make sure your `.env` file contains `GEMINI_API_KEY` and that the `data/` folder contains supported files."
+            "Make sure your `.env` file contains `GEMINI_API_KEY`."
         )
 
     else:

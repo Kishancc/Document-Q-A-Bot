@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from turtle import st
 from typing import List
 
 import chromadb
@@ -140,6 +141,8 @@ def create_embedding_collection(client: chromadb.PersistentClient):
         name=VECTOR_COLLECTION_NAME,
         embedding_function=GoogleGenerativeAiEmbeddingFunction(
             api_key=GEMINI_API_KEY,
+            
+            GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
             model_name=EMBEDDING_MODEL,
         ),
         metadata={"hnsw:space": "cosine"},
