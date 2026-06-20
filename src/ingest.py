@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from turtle import st
 from typing import List
 
 import chromadb
