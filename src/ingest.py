@@ -140,9 +140,9 @@ def create_embedding_collection(client: chromadb.PersistentClient):
     return client.get_or_create_collection(
         name=VECTOR_COLLECTION_NAME,
         embedding_function=GoogleGenerativeAiEmbeddingFunction(
-            #api_key=GEMINI_API_KEY,
+            api_key=GEMINI_API_KEY,
             
-            GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+            # GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
             model_name=EMBEDDING_MODEL,
         ),
         metadata={"hnsw:space": "cosine"},
